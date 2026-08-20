@@ -1,0 +1,177 @@
+import { z } from "zod";
+
+const text = (max = 500) => z.string().max(max);
+const linkSchema = z.object({ label: text(80), href: text(500) });
+const mediaKindSchema = z.enum(["image", "video"]);
+const colorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
+
+export const DEFAULT_TEXT_COLORS: Record<string, string> = {
+  ribbonText: "#F9F7F1", ribbonLink: "#F28C1B",
+  heroKicker: "#F28C1B", heroSeal: "#20211E", heroTitleStart: "#20211E", heroTitleAccent: "#F28C1B", heroTitleEnd: "#20211E", heroDescription: "#5F5E58", heroPrimaryAction: "#20211E", heroSecondaryAction: "#20211E",
+  servicesEyebrow: "#F28C1B", servicesTitle: "#20211E", servicesAccent: "#F28C1B", servicesDescription: "#5F5E58",
+  collectionEyebrow: "#F28C1B", collectionTitle: "#20211E", collectionAccent: "#F28C1B", collectionDescription: "#5F5E58", collectionAction: "#20211E",
+  productsEyebrow: "#F28C1B", productsTitle: "#20211E", productsAccent: "#F28C1B", productsBody: "#5F5E58", productsAction: "#20211E",
+  offerLabel: "#F28C1B", offerTitle: "#F9F7F1", offerAccent: "#F28C1B", offerDescription: "#DDD9D0", offerAction: "#20211E",
+  contactEyebrow: "#F28C1B", contactTitle: "#20211E", contactAccent: "#F28C1B", contactDescription: "#5F5E58", contactReturn: "#20211E", customAction: "#20211E", footerText: "#F9F7F1",
+};
+
+export const siteContentSchema = z.object({
+  branding: z.object({
+    name: text(80),
+    logoUrl: text(500),
+    eyeMarkUrl: text(500),
+    primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    inkColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    creamColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    displayFont: z.enum(["Changa", "Tajawal"]),
+    bodyFont: z.enum(["Tajawal", "Changa"]),
+  }),
+  textColors: z.record(z.string(), colorSchema).default(DEFAULT_TEXT_COLORS),
+  ribbon: z.object({ notice: text(160), link: linkSchema }),
+  navigation: z.array(z.object({ label: text(60), href: text(240) })).min(1).max(10),
+  hero: z.object({
+    kicker: text(140),
+    sealText: text(100),
+    sealSubtext: text(140),
+    titleStart: text(100),
+    titleAccent: text(100),
+    titleEnd: text(100),
+    description: text(600),
+    primaryAction: linkSchema,
+    secondaryAction: linkSchema,
+    mediaKind: mediaKindSchema,
+    mediaUrl: text(500),
+    quickFacts: z.array(z.object({ number: text(12), label: text(80) })).min(1).max(6),
+  }),
+  trustItems: z.array(text(160)).min(1).max(6),
+  services: z.object({
+    eyebrow: text(100),
+    title: text(180),
+    accent: text(100),
+    description: text(600),
+    items: z.array(z.object({ number: text(40), title: text(100), body: text(360) })).min(1).max(6),
+  }),
+  collection: z.object({
+    eyebrow: text(100),
+    title: text(180),
+    accent: text(100),
+    description: text(600),
+    action: linkSchema,
+    items: z.array(z.object({
+      category: text(100),
+      title: text(150),
+      frameType: text(80).default("طبي"),
+      frameColor: text(80).default("محايد"),
+      whatsappMessage: text(500).default(""),
+      mediaKind: mediaKindSchema,
+      mediaUrl: text(500),
+      style: z.enum(["media", "illustration"]),
+    })).min(1).max(9),
+  }),
+  products: z.object({
+    eyebrow: text(100),
+    title: text(180),
+    accent: text(100),
+    imageTag: text(100),
+    imageUrl: text(500),
+    mediaKind: mediaKindSchema,
+    items: z.array(text(200)).min(1).max(6),
+    seal: text(180),
+    action: linkSchema,
+  }),
+  offer: z.object({
+    label: text(100),
+    title: text(180),
+    accent: text(100),
+    description: text(600),
+    action: linkSchema,
+  }),
+  contact: z.object({
+    eyebrow: text(100),
+    title: text(180),
+    accent: text(100),
+    description: text(600),
+    phoneLabel: text(100),
+    phone: text(120),
+    whatsappNumber: text(40).default(""),
+    hoursLabel: text(100),
+    hours: text(160),
+    locationLabel: text(100),
+    location: text(200),
+    mapTitle: text(120),
+    mapDescription: text(220),
+    mapUrl: text(500),
+  }),
+  footer: z.object({ description: text(400), copyright: text(160), note: text(160) }),
+  customSections: z.array(z.object({
+    id: text(80),
+    visible: z.boolean(),
+    eyebrow: text(100),
+    title: text(180),
+    description: text(800),
+    action: linkSchema,
+    mediaKind: mediaKindSchema,
+    mediaUrl: text(500),
+  })).max(12),
+});
+
+export type SiteContent = z.infer<typeof siteContentSchema>;
+
+export const DEFAULT_SITE_CONTENT: SiteContent = {
+  branding: {
+    name: "بصريات العادل",
+    logoUrl: "/manus-storage/aladel-logo-source_a78b8dd9.png",
+    eyeMarkUrl: "/manus-storage/aladel-eye-mark_fbd659ce.png",
+    primaryColor: "#F28C1B",
+    inkColor: "#20211E",
+    creamColor: "#F9F7F1",
+    displayFont: "Changa",
+    bodyFont: "Tajawal",
+  },
+  textColors: DEFAULT_TEXT_COLORS,
+  ribbon: { notice: "تشكيلتنا من العدسات والفريمات بانتظارك في الفرع", link: { label: "اعرف أقرب طريقة للتواصل", href: "#contact" } },
+  navigation: [["الرئيسية", "#home"], ["خدماتنا", "#services"], ["تشكيلتنا", "#collection"], ["العدسات والفريمات", "#products"], ["تواصل", "#contact"]].map(([label, href]) => ({ label, href })),
+  hero: {
+    kicker: "لأن الرؤية تبدأ من الاختيار الصحيح",
+    sealText: "بصريات العادل",
+    sealSubtext: "اختيار يرى تفاصيلك.",
+    titleStart: "رؤيتك،",
+    titleAccent: "بوضوح",
+    titleEnd: "مهمتنا.",
+    description: "في بصريات العادل، تجد عدسات عملية وفريمات مختارة بعناية لتمنحك وضوحًا مريحًا وإطلالة تناسب يومك.",
+    primaryAction: { label: "تصفّح العدسات والفريمات", href: "#products" },
+    secondaryAction: { label: "استعرض الفريمات", href: "#collection" },
+    mediaKind: "image",
+    mediaUrl: "/manus-storage/aladel-hero-editorial_84f83a17.jpg",
+    quickFacts: [{ number: "01", label: "عدسات طبية" }, { number: "02", label: "فريمات متنوعة" }, { number: "03", label: "نظارات شمسية" }],
+  },
+  trustItems: ["عدسات تناسب تفاصيل يومك", "إطارات تناسب أسلوبك اليومي", "خامات وخيارات متجددة"],
+  services: {
+    eyebrow: "كيف نخدم رؤيتك", title: "عدسات وفريمات، لأن", accent: "الوضوح يبدأ من التفاصيل.", description: "نقدّم لك مجموعة منتقاة من العدسات والفريمات التي تجمع بين الاستخدام اليومي، الجودة، والذوق الشخصي.",
+    items: [
+      { number: "01 / العدسات الطبية", title: "وضوح يرافق يومك", body: "عدسات للاستخدام اليومي والقراءة والعمل، لتمنحك راحة ورؤية أوضح في كل تفاصيلك." },
+      { number: "02 / الفريمات الطبية", title: "فريم يعكس أسلوبك", body: "تشكيلة من الفريمات العملية والأنيقة بخامات وألوان تمنح حضورك لمسة أكثر تميزًا." },
+      { number: "03 / النظارات الشمسية", title: "حماية تكمل إطلالتك", body: "نظارات شمسية تجمع بين الحماية والذوق، بتصاميم تناسب المشاوير اليومية واللحظات الخاصة." },
+    ],
+  },
+  collection: {
+    eyebrow: "اختر ما يشبهك", title: "تشكيلة ترافق", accent: "كل زاوية من يومك.", description: "تصاميم هادئة أو جريئة، عملية أو لافتة. ابدأ من إحساسك، ودع التفاصيل البصرية تكمّل الاختيار.", action: { label: "اسأل عن المتوفر", href: "#contact" },
+    items: [
+      { category: "الإطارات الطبية", title: "وضوح يومي", frameType: "طبي", frameColor: "عسلي", whatsappMessage: "أرغب بالاستفسار عن فريم وضوح يومي.", mediaKind: "image", mediaUrl: "/manus-storage/aladel-frame-amber_064d1abb.jpg", style: "media" },
+      { category: "اختيارك الشخصي", title: "إطار يلفت دون أن يبالغ.", frameType: "طبي", frameColor: "شفاف", whatsappMessage: "أرغب بالاستفسار عن فريم اختيارك الشخصي.", mediaKind: "image", mediaUrl: "", style: "illustration" },
+      { category: "النظارات الشمسية", title: "ضوء أقل، حضور أكبر", frameType: "شمسي", frameColor: "أسود", whatsappMessage: "أرغب بالاستفسار عن نظارة شمسية ضوء أقل، حضور أكبر.", mediaKind: "image", mediaUrl: "/manus-storage/aladel-sunwear-charcoal_f71447f2.jpg", style: "media" },
+    ],
+  },
+  products: {
+    eyebrow: "تفاصيلك تبدأ هنا", title: "اختَر عدستك وفريمك على", accent: "طريقتك.", imageTag: "فريمات وعدسات مختارة", imageUrl: "/manus-storage/aladel-optometry-detail_544ccead.jpg", mediaKind: "image",
+    items: ["عدسات تلائم القراءة والعمل والاستخدام اليومي.", "فريمات تتنوّع بين الهادئ والجريء والكلاسيكي.", "نظارات شمسية تضيف حماية وأناقة إلى يومك."],
+    seal: "العادل يجمع لك العدسة والفريم في اختيار متناسق.", action: { label: "اعرف المتوفر", href: "#contact" },
+  },
+  offer: { label: "لمن يختار الجديد", title: "لنكتشف عدستك وفريمك،", accent: "لتعيش الوضوح.", description: "زر الفرع واستعرض خيارات العدسات والفريمات والنظارات الشمسية المتوفرة. كل قطعة هنا صُممت لترافق يومك براحة وأناقة.", action: { label: "تواصل لمعرفة المتوفر", href: "#contact" } },
+  contact: {
+    eyebrow: "نحن قريبون من رؤيتك", title: "ابدأ حديثك مع", accent: "فريمك القادم.", description: "أضف بيانات الفرع الرسمية هنا، ليصل العميل إلى أحدث تشكيلات العدسات والفريمات بكل سهولة.",
+    phoneLabel: "خطوة التواصل الأولى", phone: "أضف رقم التواصل المعتمد للفرع", whatsappNumber: "", hoursLabel: "وقت مناسب لزيارتك", hours: "حدّد ساعات استقبال زوّارك", locationLabel: "طريقك إلى الرؤية الأوضح", location: "اربط موقع الفرع المعتمد", mapTitle: "اجعل الوصول إليك واضحًا", mapDescription: "أضف رابط Google Maps المعتمد للفرع في هذه المساحة.", mapUrl: "",
+  },
+  footer: { description: "رؤية أدق، وإطار أقرب لشخصيتك — مع عناية تضعك في بؤرة الاختيار.", copyright: "جميع الحقوق محفوظة.", note: "صمم بعين تهتم بالتفاصيل." },
+  customSections: [],
+};
